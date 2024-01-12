@@ -213,73 +213,77 @@ Future<List<Map<String, dynamic>>> getImagesFromStorage(int index) async {
       child: Container(
         width: double.infinity,
         color: Colors.white,
-        child:  SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              // FilterBar(),
-    //           Container(
-    //             height: 400,
-    //             width: double.infinity,
-    //             child: ListView.builder(
-    //   itemCount: _imageUrls.length,
-    //   itemBuilder: (context, index) {
-    //     final imageUrl = _imageUrls[index][1];
+        child:  RefreshIndicator(
+          onRefresh: ()async{},
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                // FilterBar(),
+              //           Container(
+              //             height: 400,
+              //             width: double.infinity,
+              //             child: ListView.builder(
+              //   itemCount: _imageUrls.length,
+              //   itemBuilder: (context, index) {
+              //     final imageUrl = _imageUrls[index][1];
 
-    //     return ListTile(
-    //       title: Image.network(imageUrl),
-    //     );
-    //   },
-    // )
-    //           ),
-              // Container(
-              //   height: 50,
-              //   child: ListView.builder(itemBuilder: (context,index){
-              //     return Text("data");
-              //   }),
+              //     return ListTile(
+              //       title: Image.network(imageUrl),
+              //     );
+              //   },
+              // )
+              //           ),
+                // Container(
+                //   height: 50,
+                //   child: ListView.builder(itemBuilder: (context,index){
+                //     return Text("data");
+                //   }),
+                // ),
+              //             StreamBuilder(
+              //               stream: messagesStream,
+              //   builder: (context, snapshot) {
+              //     if (snapshot.hasData) return const Text('Loading...');
+              //     return ListView.builder(
+              //       itemExtent: 225.0,
+              //       itemCount: snapshot.data.documents.length,
+              //       itemBuilder: (context, index) =>
+              //           _buildListItems(context, snapshot.data.documents[index]),
+              //     );
+              //   },
               // ),
-    //             StreamBuilder(
-    //               stream: messagesStream,
-    //   builder: (context, snapshot) {
-    //     if (snapshot.hasData) return const Text('Loading...');
-    //     return ListView.builder(
-    //       itemExtent: 225.0,
-    //       itemCount: snapshot.data.documents.length,
-    //       itemBuilder: (context, index) =>
-    //           _buildListItems(context, snapshot.data.documents[index]),
-    //     );
-    //   },
-    // ),
-              Container(
-                child: ListView.builder(
-                  physics: ScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: rentalTypes.length,
-                  itemBuilder: (BuildContext context,index){
-                    Future<List<Map<String, dynamic>>> imageUrls =  getImagesFromStorage(index);
-                    String details = rentalTypes[index]['houseDetails'];
-                    String rent = rentalTypes[index]['rent'];
-                    String Uid = rentalTypes[index]['UID']; 
-                    String areaname = rentalTypes[index]['rentalArea']; 
-                    Timestamp getdate = rentalTypes[index]['rentDate'];
-                    String renttype = rentalTypes[index]['rentType'];
-                    String address = rentalTypes[index]['rentalAddress'];
-                    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(getdate.seconds * 1000);
-                    return GestureDetector(onTap:() {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context)=>PostViewDetails(rentType: rentalTypes[index],imageurl: imageUrls,uid : Uid,date :dateTime )));
-                    }, 
-                    child: PostItem(imageurls: imageUrls, description: details, price: rent,date: dateTime,rentType:renttype,Address:address,RentalArea:areaname));
-                  }
-                  ),
-              ),
-              SizedBox(height: 60,)
-              // PostItem(image: AssetImage("assets/images/bedroom.jpg"),description: "ফ্ল্যাট ভাড়া হবে সেপ্টেম্বর মাস থেকে, মিরপুর ১০, 597 est kazipara mirpur Dhaka 1216, 597 est kazipara mirpur Dhaka 1216",price: "৳ ১৫,৭৮৫৭০",),
-              // PostItem(image: AssetImage("assets/images/bedroom2.jpg"),description:"বাসা ভাড়া খুঁজছি, ইসলামপুর" ,price: "৳ ৫,০০০",),
-              // PostItem(image: AssetImage("assets/images/bedroom3.jpg"),description:"ফ্ল্যাট ভাড়া হবে সেপ্টেম্বর মাস থেকে সাভার" ,price: "৳ ১৫,৭৮৫৭০",),
-              // ElevatedButton(onPressed: (){
-              //   print(rentalTypes);
-              // }, child: Text("data"))
-              ],
+                Container(
+                  child: ListView.builder(
+                    physics: ScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: rentalTypes.length,
+                    itemBuilder: (BuildContext context,index){
+                      Future<List<Map<String, dynamic>>> imageUrls =  getImagesFromStorage(index);
+                      String details = rentalTypes[index]['houseDetails'];
+                      String rent = rentalTypes[index]['rent'];
+                      String Uid = rentalTypes[index]['UID'];
+                      String areaname = rentalTypes[index]['rentalArea'];
+                      Timestamp getdate = rentalTypes[index]['rentDate'];
+                      String renttype = rentalTypes[index]['rentType'];
+                      String address = rentalTypes[index]['rentalAddress'];
+                      DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(getdate.seconds * 1000);
+                      return GestureDetector(onTap:() {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context)=>PostViewDetails(rentType: rentalTypes[index],imageurl: imageUrls,uid : Uid,date :dateTime )));
+                      },
+                      child: PostItem(imageurls: imageUrls, description: details, price: rent,date: dateTime,rentType:renttype,Address:address,RentalArea:areaname));
+                    }
+                    ),
+                ),
+                SizedBox(height: 60,)
+                // PostItem(image: AssetImage("assets/images/bedroom.jpg"),description: "ফ্ল্যাট ভাড়া হবে সেপ্টেম্বর মাস থেকে, মিরপুর ১০, 597 est kazipara mirpur Dhaka 1216, 597 est kazipara mirpur Dhaka 1216",price: "৳ ১৫,৭৮৫৭০",),
+                // PostItem(image: AssetImage("assets/images/bedroom2.jpg"),description:"বাসা ভাড়া খুঁজছি, ইসলামপুর" ,price: "৳ ৫,০০০",),
+                // PostItem(image: AssetImage("assets/images/bedroom3.jpg"),description:"ফ্ল্যাট ভাড়া হবে সেপ্টেম্বর মাস থেকে সাভার" ,price: "৳ ১৫,৭৮৫৭০",),
+                // ElevatedButton(onPressed: (){
+                //   print(rentalTypes);
+                // }, child: Text("data"))
+                ],
+            ),
           ),
         ),
       ) 

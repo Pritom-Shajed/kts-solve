@@ -130,54 +130,63 @@ class _HomeNavState extends State<HomeNav> {
         ),
       ),
       body: SafeArea(
-      child: Container(
-        width: double.infinity,
-        color: Colors.white,
-        child:  SingleChildScrollView(
-          child: Column(
+      child: RefreshIndicator(
+        onRefresh: () async{
+          fetchAllPosts();
+          setState(() {
+            getUsersInfo();
+          });
+        },
+        child: Container(
+          width: double.infinity,
+          color: Colors.white,
+          child:  SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            child: Column(
+              children: [
+                FutureBuilder(
+            future: getUsersInfo(),
+            builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(child: Center(child: Column(
             children: [
-              FutureBuilder(
-    future: getUsersInfo(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Container(child: Center(child: Column(
-          children: [
-            SizedBox(height: 50,),
-            CircularProgressIndicator(),
-            SizedBox(height: 50,),
-          ],
-        ))); // Show a loading indicator while fetching data.
-      } else if (snapshot.hasError) {
-        return Container(child: Center(child: Column(
-          children: [
-            SizedBox(height: 50,),
-            CircularProgressIndicator(),
-            SizedBox(height: 50,),
-          ],
-        ))); 
-      } else {
-        return Padding(
-                padding: const EdgeInsets.only(left: 15.0,top: 20),
-                child: Align(alignment: Alignment.centerLeft, child: Text('Hello, ${userinfo['name']}',style:GoogleFonts.openSans(fontSize: 16,fontWeight: FontWeight.bold))),
-              );
-      }
-    },
-  ) ,
-              Padding(
-                padding: const EdgeInsets.only(left: 15.0,top: 10,bottom:25 ),
-                child: Align(alignment: Alignment.centerLeft, child: Text('Search Your Next Home for better living with a peaceful Sociaty',style:GoogleFonts.openSans(fontSize: 13,fontWeight: FontWeight.w400))),
-              ),
-              NoticeMsg(),
-              SizedBox(height: 20.0),
+              SizedBox(height: 50,),
+              CircularProgressIndicator(),
+              SizedBox(height: 50,),
+            ],
+          ))); // Show a loading indicator while fetching data.
+        } else if (snapshot.hasError) {
+          return Container(child: Center(child: Column(
+            children: [
+              SizedBox(height: 50,),
+              CircularProgressIndicator(),
+              SizedBox(height: 50,),
+            ],
+          )));
+        } else {
+          return Padding(
+                  padding: const EdgeInsets.only(left: 15.0,top: 20),
+                  child: Align(alignment: Alignment.centerLeft, child: Text('Hello, ${userinfo['name']}',style:GoogleFonts.openSans(fontSize: 16,fontWeight: FontWeight.bold))),
+                );
+        }
+            },
+          ) ,
+                Padding(
+                  padding: const EdgeInsets.only(left: 15.0,top: 10,bottom:25 ),
+                  child: Align(alignment: Alignment.centerLeft, child: Text('Search Your Next Home for better living with a peaceful Sociaty',style:GoogleFonts.openSans(fontSize: 13,fontWeight: FontWeight.w400))),
+                ),
+                NoticeMsg(),
+                SizedBox(height: 20.0),
 
-              
-              GestureDetector(
-                onTap:(){
-                  Navigator.of(context).push(MaterialPageRoute(builder:(context)=> AdvertisementNav() ));},
-                
-                child: NewPosts()),
-              PopularCatagories(),
-              ],
+
+                GestureDetector(
+                  onTap:(){
+                    Navigator.of(context).push(MaterialPageRoute(builder:(context)=> AdvertisementNav() ));},
+
+                  child: NewPosts()),
+                PopularCatagories(),
+                ],
+            ),
           ),
         ),
       ),

@@ -2,11 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:house_rent/pages/Landing/landing.dart';
 import 'package:house_rent/pages/new_post_form.dart';
 import 'package:house_rent/pages/post_view_details.dart';
+import 'package:house_rent/widgets/bottom_sheet.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+enum SampleItem { update, delete }
 class OwnFeedPage extends StatefulWidget {
  
  const OwnFeedPage({super.key});
@@ -17,7 +19,7 @@ class OwnFeedPage extends StatefulWidget {
 }
 
   late Stream<QuerySnapshot> messagesStream;
-
+  late TextEditingController rentTextController;
  
 List<dynamic> ownrentalTypes = [] ;
  String docname='';
@@ -61,13 +63,21 @@ List<Map<String, dynamic>> _imageUrls = [];
  @override
   void initState() {
     super.initState();
-    
+    rentTextController = TextEditingController();
     setState(() {
       _imageUrls = [];
       getAllPosts();
     });
     
   }
+
+@override
+  dispose (){
+   rentTextController.dispose();
+   super.dispose();
+  }
+
+
 
 Future<List<Map<String, dynamic>>> getImagesFromStorage(int index) async {
   List<Map<String, dynamic>> imageList = [];
@@ -182,72 +192,50 @@ Future<List<Map<String, dynamic>>> getImagesFromStorage(int index) async {
       child: Container(
         width: double.infinity,
         color: Colors.white,
-        child:  SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              // FilterBar(),
-    //           Container(
-    //             height: 400,
-    //             width: double.infinity,
-    //             child: ListView.builder(
-    //   itemCount: _imageUrls.length,
-    //   itemBuilder: (context, index) {
-    //     final imageUrl = _imageUrls[index][1];
+        child:  RefreshIndicator(
+          onRefresh: ()async{
+            getAllPosts();
+          },
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Container(
+                  child: ListView.builder(
+                    physics: ScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: ownrentalTypes.length,
+                    itemBuilder: (BuildContext context,index){
+                      int imgads = ownrentalTypes[index]["postno"];
+                      int postNo = ownrentalTypes[index]["postno"];
+                      Future<List<Map<String, dynamic>>> imageUrls =  getImagesFromStorage(imgads);
+                      String details = ownrentalTypes[index]['houseDetails'];
+                      String rent = ownrentalTypes[index]['rent'];
+                      String Uid = ownrentalTypes[index]['UID'];
+                      String renttype = ownrentalTypes[index]['rentType'];
+                      Timestamp getdate = ownrentalTypes[index]['rentDate'];
+                      DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(getdate.seconds * 1000);
+                      return GestureDetector(onTap:() {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context)=>PostViewDetails(rentType: ownrentalTypes[index],imageurl: imageUrls,uid : Uid,date :dateTime)));
+                      },
+                      child: PostItem(imageurls: imageUrls,
+                          postUid: 'post$postNo',
+                          rentTextController: rentTextController,
+                          oldPrice: rent,
+                          description: details, price: rent,date: dateTime,rentType:renttype));
 
-    //     return ListTile(
-    //       title: Image.network(imageUrl),
-    //     );
-    //   },
-    // )
-    //           ),
-              // Container(
-              //   height: 50,
-              //   child: ListView.builder(itemBuilder: (context,index){
-              //     return Text("data");
-              //   }),
-              // ),
-    //             StreamBuilder(
-    //               stream: messagesStream,
-    //   builder: (context, snapshot) {
-    //     if (snapshot.hasData) return const Text('Loading...');
-    //     return ListView.builder(
-    //       itemExtent: 225.0,
-    //       itemCount: snapshot.data.documents.length,
-    //       itemBuilder: (context, index) =>
-    //           _buildListItems(context, snapshot.data.documents[index]),
-    //     );
-    //   },
-    // ),
-              Container(
-                child: ListView.builder(
-                  physics: ScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: ownrentalTypes.length,
-                  itemBuilder: (BuildContext context,index){
-                    int imgads = ownrentalTypes[index]["postno"];
-                    Future<List<Map<String, dynamic>>> imageUrls =  getImagesFromStorage(imgads);
-                    String details = ownrentalTypes[index]['houseDetails'];
-                    String rent = ownrentalTypes[index]['rent'];
-                    String Uid = ownrentalTypes[index]['UID']; 
-                    String renttype = ownrentalTypes[index]['rentType'];
-                    Timestamp getdate = ownrentalTypes[index]['rentDate'];
-                    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(getdate.seconds * 1000);
-                    return GestureDetector(onTap:() {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context)=>PostViewDetails(rentType: ownrentalTypes[index],imageurl: imageUrls,uid : Uid,date :dateTime)));
-                    }, 
-                    child: PostItem(imageurls: imageUrls, description: details, price: rent,date: dateTime,rentType:renttype));
-                    
-                  }
-                  ),
-              ),
-              // PostItem(image: AssetImage("assets/images/bedroom.jpg"),description: "ফ্ল্যাট ভাড়া হবে সেপ্টেম্বর মাস থেকে, মিরপুর ১০, 597 est kazipara mirpur Dhaka 1216, 597 est kazipara mirpur Dhaka 1216",price: "৳ ১৫,৭৮৫৭০",),
-              // PostItem(image: AssetImage("assets/images/bedroom2.jpg"),description:"বাসা ভাড়া খুঁজছি, ইসলামপুর" ,price: "৳ ৫,০০০",),
-              // PostItem(image: AssetImage("assets/images/bedroom3.jpg"),description:"ফ্ল্যাট ভাড়া হবে সেপ্টেম্বর মাস থেকে সাভার" ,price: "৳ ১৫,৭৮৫৭০",),
-              // ElevatedButton(onPressed: (){
-              //   print(rentalTypes);
-              // }, child: Text("data"))
-              ],
+                    }
+                    ),
+                ),
+                // PostItem(image: AssetImage("assets/images/bedroom.jpg"),description: "ফ্ল্যাট ভাড়া হবে সেপ্টেম্বর মাস থেকে, মিরপুর ১০, 597 est kazipara mirpur Dhaka 1216, 597 est kazipara mirpur Dhaka 1216",price: "৳ ১৫,৭৮৫৭০",),
+                // PostItem(image: AssetImage("assets/images/bedroom2.jpg"),description:"বাসা ভাড়া খুঁজছি, ইসলামপুর" ,price: "৳ ৫,০০০",),
+                // PostItem(image: AssetImage("assets/images/bedroom3.jpg"),description:"ফ্ল্যাট ভাড়া হবে সেপ্টেম্বর মাস থেকে সাভার" ,price: "৳ ১৫,৭৮৫৭০",),
+                // ElevatedButton(onPressed: (){
+                //   print(rentalTypes);
+                // }, child: Text("data"))
+                ],
+            ),
           ),
         ),
       ),
@@ -255,7 +243,10 @@ Future<List<Map<String, dynamic>>> getImagesFromStorage(int index) async {
   }
 }
 
-class PostItem extends StatelessWidget {
+class PostItem extends StatefulWidget {
+  final String postUid;
+  final TextEditingController rentTextController;
+  final String oldPrice;
   final DateTime date;
   final String description;
   final String price;
@@ -266,58 +257,144 @@ class PostItem extends StatelessWidget {
    required this.price,
    required this.imageurls,
    required this.date,
-   required this.rentType
+   required this.rentType, required this.rentTextController, required this.oldPrice, required this.postUid
   });
+
+  @override
+  State<PostItem> createState() => _PostItemState();
+}
+
+class _PostItemState extends State<PostItem> {
+
 String getFormattedDate() {
-  String monthName = DateFormat('MMMM').format(date);
+  String monthName = DateFormat('MMMM').format(widget.date);
   // DateFormat('MMMM dd, yyyy').format(date);
     // Format the selected date to include the month name
     return monthName;
   }
+
+Future<void> updateRent(
+    BuildContext context, {
+      required String rent,
+    }) async {
+  try {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return Center(
+            child:
+            Center(child: CircularProgressIndicator(color: Colors.white,)),
+          );
+        });
+    await FirebaseFirestore.instance
+        .collection('posts')
+        .doc(widget.postUid)
+        .update({
+      'rent': rent,
+    });
+   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LandingPage()));
+
+  } catch (e) {
+
+    throw Exception(e.toString());
+  }
+}
+
   @override
   Widget build(BuildContext context) {
+    widget.rentTextController.text = widget.oldPrice;
+    SampleItem? selectedMenu;
     return Container(
       padding: EdgeInsets.fromLTRB(20.0,15.0 ,20.0,0),
       child: Column(
         children: [
-          FutureBuilder(future: imageurls, 
+          FutureBuilder(future: widget.imageurls,
           builder: (context,snapshot){
            final img =snapshot.data ?? [{'url' : ''}];
-            return 
-          Container(
-            height: 200,
-            width: double.infinity,
-            alignment: Alignment.bottomLeft,
-            decoration: BoxDecoration(
-              image: DecorationImage(fit: BoxFit.fill, image: NetworkImage( img[0]['url'] )),
-              borderRadius: BorderRadius.circular(10.0)
-            ),
-            child: Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(10.0),gradient: LinearGradient(begin: Alignment.bottomCenter,end:Alignment.topCenter, colors: [Colors.black87,Colors.transparent])),
-              child: Row(
-                children: [
-                  Icon(Icons.apartment_outlined,color: Colors.white,),
-                  SizedBox(width: 5.0,),
-                  Text(rentType,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500),),
-                  SizedBox(width: 10.0,),
-                  Icon(Icons.calendar_month_outlined,color: Colors.white,),
-                  SizedBox(width: 5.0,),
-                  Text(getFormattedDate(),style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500),),
-                  SizedBox(width: 10.0,),
-                  Icon(Icons.visibility_outlined,color: Colors.white,),
-                  SizedBox(width: 5.0,),
-                  Text("0",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500),)
-            
-                ],
+            return
+          Stack(
+            children: [
+              Container(
+                height: 200,
+                width: double.infinity,
+                alignment: Alignment.bottomLeft,
+                decoration: BoxDecoration(
+                  image: DecorationImage(fit: BoxFit.fill, image: NetworkImage( img[0]['url'] )),
+                  borderRadius: BorderRadius.circular(10.0)
+                ),
+                child: Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10.0),gradient: LinearGradient(begin: Alignment.bottomCenter,end:Alignment.topCenter, colors: [Colors.black87,Colors.transparent])),
+                  child: Row(
+                    children: [
+                      Icon(Icons.apartment_outlined,color: Colors.white,),
+                      SizedBox(width: 5.0,),
+                      Text(widget.rentType,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500),),
+                      SizedBox(width: 10.0,),
+                      Icon(Icons.calendar_month_outlined,color: Colors.white,),
+                      SizedBox(width: 5.0,),
+                      Text(getFormattedDate(),style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500),),
+                      SizedBox(width: 10.0,),
+                      Icon(Icons.visibility_outlined,color: Colors.white,),
+                      SizedBox(width: 5.0,),
+                      Text("0",style: TextStyle(color: Colors.white,fontWeight: FontWeight.w500),)
+
+                    ],
+                  ),
+                ),
               ),
-            ),
+              Positioned(
+                child: CircleAvatar(
+                    child: PopupMenuButton(
+                      iconSize: 10,
+                      initialValue: selectedMenu,
+                      onSelected: (SampleItem item) {
+                        setState(() {
+                          selectedMenu = item;
+                        });
+                        switch(item){
+                          case SampleItem.update:
+                            BottomSheets.updateAdd(context,
+                                onTapUpdate: (){
+                              Navigator.pop(context);
+                              updateRent(context, rent: rentTextController.text);
+
+                                },
+                                rentTextController: rentTextController,
+                            );
+                            break;
+                          case SampleItem.delete:
+                            debugPrint('delete');
+                            break;
+                          default:
+                            print('nothing');
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
+                        const PopupMenuItem<SampleItem>(
+                          value: SampleItem.update,
+                          child: Text('Update'),
+                        ),
+                        const PopupMenuItem<SampleItem>(
+                          value: SampleItem.delete,
+                          child: Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  radius: 12,
+                  backgroundColor: Colors.white.withOpacity(0.8),
+                ),
+                right: 10,
+                top: 10,
+              )
+            ],
           );}
           ),
         SizedBox(height: 20.0,),
-        Align(alignment: Alignment.centerLeft, child: Text(description,style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500,height: 1.5),)),
+        Align(alignment: Alignment.centerLeft, child: Text(widget.description,style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500,height: 1.5),)),
         SizedBox(height: 5.0,),
-        Align(alignment: Alignment.centerLeft, child: Text("৳ $price",style: TextStyle(fontSize: 15.0,fontWeight: FontWeight.bold),))
+        Align(alignment: Alignment.centerLeft, child: Text("৳ ${widget.price}",style: TextStyle(fontSize: 15.0,fontWeight: FontWeight.bold),))
         ],
       ),
     );

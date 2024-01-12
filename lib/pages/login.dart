@@ -161,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
                   GestureDetector(
                     onTap: () async {
                       firebaseService.loginUser(emailcontroller.text, passwordcontroller.text).then((value) => 
-                      value=="success" ? Navigator.of(context).push(MaterialPageRoute(builder: (context) => LandingPage())):ScaffoldMessenger.of(context)
+                      value=="success" ? Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => LandingPage())):ScaffoldMessenger.of(context)
                               .showSnackBar(snackBar));
                     
                       saveuid(emailcontroller.text, passwordcontroller.text);
