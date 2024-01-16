@@ -273,6 +273,7 @@ String getFormattedDate() {
     return monthName;
   }
 
+  //Update Post
 Future<void> updateRent(
     BuildContext context, {
       required String rent,
@@ -294,6 +295,30 @@ Future<void> updateRent(
       'rent': rent,
     });
    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LandingPage()));
+
+  } catch (e) {
+
+    throw Exception(e.toString());
+  }
+}
+
+//Delete Post
+Future<void> deletePost(
+    BuildContext context) async {
+  try {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return Center(
+            child:
+            Center(child: CircularProgressIndicator(color: Colors.white,)),
+          );
+        });
+    await FirebaseFirestore.instance
+        .collection('posts')
+        .doc(widget.postUid).delete();
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LandingPage()));
 
   } catch (e) {
 
@@ -365,7 +390,7 @@ Future<void> updateRent(
                             );
                             break;
                           case SampleItem.delete:
-                            debugPrint('delete');
+                            deletePost(context);
                             break;
                           default:
                             print('nothing');

@@ -47,34 +47,11 @@ class _HomeNavState extends State<HomeNav> {
       final List<QueryDocumentSnapshot<Map<String, dynamic>>> documents =
           querySnapshot.docs;
 
-      // Iterate through all posts
-      for (int i = 0; i < documents.length; i++) {
-        await fetchCustomerUserInfo(i); // Post indices are 1-based
-      }
-    } catch (e) {
-      throw Exception(e.toString());
-    }
-  }
-
-  Future<void> fetchCustomerUserInfo(int index) async {
-
-    try {
-      final DocumentSnapshot<Map<String, dynamic>> snapshot =
-      await _firestore.collection('posts').doc('post$index').get();
-
-      if (snapshot.exists) {
-        final postData = snapshot.data();
-
-        if(postData != null){
-          setState(() {
-            newPosts.add(postData);
-          });
-
-        }
-
-
-      } else {
-      }
+      documents.forEach((e) {
+        setState(() {
+          newPosts.add(e.data());
+        });
+      });
     } catch (e) {
       throw Exception(e.toString());
     }
@@ -179,7 +156,7 @@ class _HomeNavState extends State<HomeNav> {
                 SizedBox(height: 20.0),
 
 
-                GestureDetector(
+                 GestureDetector(
                   onTap:(){
                     Navigator.of(context).push(MaterialPageRoute(builder:(context)=> AdvertisementNav() ));},
 
@@ -202,13 +179,15 @@ class NewPosts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
+    return Column(
+
+      children: [
       Padding(
         padding: EdgeInsets.only(left:15.0),
         child: Align(alignment: Alignment.centerLeft, child: Text("নতুন পোস্ট সমূহ",style: TextStyle(fontSize: 14.0,fontWeight: FontWeight.bold),)),
       ),
       SizedBox(height: 20.0,),
-      SizedBox(
+        newPosts.isEmpty ? Text('No new posts found!') : SizedBox(
         height: 150,
         child: ListView.builder(
           shrinkWrap: true,

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:house_rent/pages/login.dart';
 import 'package:house_rent/pages/new_post_form.dart';
 import 'package:house_rent/pages/own_feed.dart';
@@ -140,19 +141,17 @@ FutureBuilder(
                                                     begin: Alignment.topCenter,
                                                     end: Alignment.bottomCenter,
                                                     colors: [
-                                                      Color.fromARGB(
-                                                          255, 74, 123, 248),
-                                                      Color.fromARGB(
-                                                          255, 22, 71, 206),
+                                                      Color.fromARGB(255, 74, 123, 248),
+                                                      Color.fromARGB(255, 22, 71, 206),
                                                     ],
                                                   ),
                                                 ),
                                                 child: InkWell(
-                                                  onTap: () {},
+                                                  onTap: () {
+
+                                                  },
                                                   child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            15.0),
+                                                    padding: const EdgeInsets.all(15.0),
                                                     child: Text(
                                                       'Thank You',
                                                       style: TextStyle(
@@ -257,7 +256,14 @@ FutureBuilder(
                                                   ),
                                                 ),
                                                 child: InkWell(
-                                                  onTap: () {},
+                                                  onTap: () async{
+                                                    final Email email = Email(
+                                                      subject: 'Customer Feedback',
+                                                      recipients: ['sirahin@gmail.com'],
+                                                      isHTML: false,
+                                                    );
+                                                    await FlutterEmailSender.send(email);
+                                                  },
                                                   child: Padding(
                                                     padding:
                                                         const EdgeInsets.all(
